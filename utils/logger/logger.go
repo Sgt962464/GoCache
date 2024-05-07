@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"log"
 	"os"
@@ -16,19 +15,22 @@ var (
 )
 
 func init() {
-	once.Do(func() {
-		logger := logrus.New()
-		outputFile, err := setOutputFile()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to set output file: %v\n", err)
-			os.Exit(1)
-		}
-		logger.Out = outputFile
-		logger.SetFormatter(&logrus.TextFormatter{
-			TimestampFormat: "2006-01-02 15:04:05",
-		})
-		LogrusObj = logger
+	if LogrusObj != nil {
+		outputFile, _ := setOutputFile()
+		LogrusObj.Out = outputFile
+		return
+	}
+
+	logger := logrus.New()
+	// outputFile, _ := setOutputFile()
+	// logger.Out = outputFile
+	logger.Out = os.Stdout
+	logger.SetLevel(logrus.DebugLevel)
+	logger.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
 	})
+
+	LogrusObj = logger
 }
 
 func setOutputFile() (*os.File, error) {
