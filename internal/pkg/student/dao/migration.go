@@ -12,7 +12,7 @@ import (
 )
 
 func migration() {
-	fmt.Println(111)
+	fmt.Println("TEST")
 	if isHasTable("student") {
 		return
 	}

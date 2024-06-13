@@ -8,3 +8,6 @@
 > go run main.go -port 9999     
 > go run main.go -port 10000     
 > go run main.go -port 10001
+ 
+### 进入GoCache/script
+> sh test3.sh
