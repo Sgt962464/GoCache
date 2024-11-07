@@ -27,6 +27,7 @@ func main() {
 	svr, err := service.NewServer(updateChan, serviceAddr)
 	if err != nil {
 		logger.LogrusObj.Errorf("acquire grpc server instance failed, %v", err)
+		//logger.LogrusObj
 		return
 	}
 

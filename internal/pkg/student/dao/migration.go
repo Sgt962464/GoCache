@@ -34,8 +34,8 @@ func isHasTable(tableName string) bool {
 func InitilizeDB() {
 	d := NewStudentDao(context.Background())
 
-	names := []string{"王五", "张三", "李四", "王二", "赵六", "李奇"}
-	//names := GenerateEnglishNames(300)
+	//names := []string{"王五", "张三", "李四", "王二", "赵六", "李奇"}
+	names := GenerateChineseNames(500)
 	for _, name := range names {
 		d.CreateStudent(&stuPb.StudentRequest{
 			Name:  name,
