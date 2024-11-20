@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	pb "gocache/api/groupcachepb"
-	"gocache/internal/middleware/etcd/discovery/discovery3"
+	"gocache/discovery"
 	"gocache/internal/service/consistenthash"
 	"gocache/utils/logger"
 	"gocache/utils/validate"
@@ -16,7 +16,7 @@ import (
 )
 
 // 测试 Server 是否实现了 Picker 接口
-var _Picker = (*Server)(nil)
+var _ Picker = (*Server)(nil)
 
 /*
 	服务器模块提供组缓存之间的通信功能。
@@ -25,8 +25,9 @@ var _Picker = (*Server)(nil)
 */
 
 const (
-	defaultBaseAddr = "127.0.0.1:9999"
-	defaultReplicas = 50
+	defaultBaseAddr  = "127.0.0.1:9999"
+	defaultReplicas  = 50
+	CacheServiceName = "GroupCache"
 )
 
 type Server struct {
@@ -35,27 +36,28 @@ type Server struct {
 	Addr       string     //format: ip:port
 	Status     bool       //true:running    false:stop
 	stopSignal chan error //通知register revoke服务
-	mu         sync.Mutex
-	consHash   *consistenthash.ConsistentHash
-	clients    map[string]*Client
-	update     chan bool
+	update     chan struct{}
+
+	mu       sync.Mutex
+	consHash *consistenthash.ConsistentHash
+	clients  map[string]*Client
 }
 
 /*
 	NewServer 将创建缓存服务器;如果addr为空，则使用默认的addr。
 */
 
-func NewServer(update chan bool, addr string) (*Server, error) {
+func NewServer(viewUpdate chan struct{}, addr string) (*Server, error) {
 	if addr == "" {
 		addr = defaultBaseAddr
 	}
+
+	// Nodes in a distributed system that can provide the same service are considered equal and are generally called Peer.
 	if !validate.ValidPeerAddr(addr) {
-		return nil, fmt.Errorf("invalid addr [ %s ],expect address format is x.x.x.x:port", addr)
+		return nil, fmt.Errorf("expect address format is x.x.x.x:port, but got %s", addr)
 	}
-	return &Server{
-		Addr:   addr,
-		update: update,
-	}, nil
+
+	return &Server{Addr: addr, update: viewUpdate}, nil
 }
 
 /*
@@ -74,6 +76,7 @@ func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, 
 	if key == "" || group == "" {
 		return resp, fmt.Errorf("key and group name is reqiured")
 	}
+
 	g := GetGroup(group)
 	if g == nil {
 		return resp, fmt.Errorf("group %s not found", group)
@@ -83,6 +86,7 @@ func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, 
 	if err != nil {
 		return resp, err
 	}
+
 	resp.Value = view.ByteSlice()
 	return resp, nil
 }
@@ -101,7 +105,7 @@ func (s *Server) SetPeers(peersAddr []string) {
 	}
 
 	s.consHash = consistenthash.NewConsistentHash(defaultReplicas, nil) //新的哈希环
-	s.consHash.Add(peersAddr)                                           //添加对等节点（真实）
+	s.consHash.AddTruthNode(peersAddr)                                  //添加对等节点（真实）
 
 	s.clients = make(map[string]*Client)
 
@@ -121,7 +125,7 @@ func (s *Server) SetPeers(peersAddr []string) {
 		*/
 
 		// 使用固定的服务名称“GroupCache”创建客户端
-		s.clients[addr] = NewClient("GroupCache")
+		s.clients[addr] = NewClient(CacheServiceName)
 	}
 	s.mu.Unlock()
 
@@ -136,6 +140,7 @@ func (s *Server) SetPeers(peersAddr []string) {
 			case <-s.update:
 				s.reconstruct()
 			case <-s.stopSignal:
+
 				s.Stop()
 			default:
 				time.Sleep(time.Second * 2)
@@ -151,7 +156,7 @@ reconstruct 重新构建服务器的一致性哈希环和客户端连接映射
   - 重新构建客户端映射连接
 */
 func (s *Server) reconstruct() {
-	serviceList, err := discovery3.ListServicePeers("GroupCache")
+	serviceList, err := discovery.ListServicePeers(CacheServiceName)
 	if err != nil { // 如果没有拿到服务实例列表，暂时先维持当前视图
 		return
 	}
@@ -159,8 +164,7 @@ func (s *Server) reconstruct() {
 	s.mu.Lock()
 
 	s.consHash = consistenthash.NewConsistentHash(defaultReplicas, nil)
-	s.consHash.Add(serviceList)
-
+	s.consHash.AddTruthNode(serviceList)
 	s.clients = make(map[string]*Client)
 
 	for _, peerAddr := range serviceList {
@@ -170,7 +174,7 @@ func (s *Server) reconstruct() {
 
 		// demo: GroupCache/127.0.0.1:9999
 		//地址有效，使用固定服务名称GroupCache和地址创建新的客户端实例，并添加到s.clients
-		s.clients[peerAddr] = NewClient("GroupCache")
+		s.clients[peerAddr] = NewClient(CacheServiceName)
 	}
 	s.mu.Unlock()
 	logger.LogrusObj.Infof("hash ring reconstruct, contain service peer %v", serviceList)
@@ -184,7 +188,7 @@ func (s *Server) Pick(key string) (Fetcher, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	// 获取对等节点地址
-	peerAddr := s.consHash.Get(key)
+	peerAddr := s.consHash.GetTruthNode(key)
 
 	if peerAddr == s.Addr || peerAddr == "" {
 		logger.LogrusObj.Infof("oohhh! pick myself, i am %s", s.Addr)
@@ -232,7 +236,7 @@ func (s *Server) Start() {
 	//服务注册
 	go func() {
 		//注册当前服务器实例
-		err := discovery3.Register("GroupCache", s.Addr, s.stopSignal)
+		err := discovery.Register(CacheServiceName, s.Addr, s.stopSignal)
 		if err != nil {
 			logger.LogrusObj.Error(err.Error())
 		}

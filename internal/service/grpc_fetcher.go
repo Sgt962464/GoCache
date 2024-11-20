@@ -5,7 +5,7 @@ import (
 	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	pb "gocache/api/groupcachepb"
-	"gocache/internal/middleware/etcd/discovery/discovery3"
+	"gocache/discovery"
 	"gocache/utils/logger"
 	"time"
 )
@@ -37,7 +37,7 @@ func (c *Client) Fetch(group string, key string) ([]byte, error) {
 	defer cli.Close()
 
 	start := time.Now()
-	conn, err := discovery3.Discovery(cli, c.serviceName)
+	conn, err := discovery.Discovery(cli, c.serviceName)
 	logger.LogrusObj.Warnf("本次 grpc dial 的耗时为: %v ms", time.Since(start).Milliseconds())
 	if err != nil {
 		return nil, err

@@ -65,6 +65,10 @@ func NewGroup(name string, strategy string, maxBytes int64, retriever Retriever)
 		retriever: retriever,
 		flight:    singleflight.NewSingleFlight(time.Second * 10),
 	}
+
+	mu.Lock()
+	GroupManager[name] = g
+	mu.Unlock()
 	return g
 }
 
@@ -75,15 +79,16 @@ func GetGroup(name string) *Group {
 	mu.RUnlock()
 	return g
 }
-func DestroyGroup(name string) {
-	g := GetGroup(name)
-	if g != nil {
-		svr := g.server.(*Server)
-		svr.Stop()
 
-		delete(GroupManager, name)
-	}
-}
+//func DestroyGroup(name string) {
+//	g := GetGroup(name)
+//	if g != nil {
+//		svr := g.server.(*Server)
+//		svr.Stop()
+//
+//		delete(GroupManager, name)
+//	}
+//}
 
 /*
 Get
@@ -91,6 +96,13 @@ Get
  - 缓存不存在，调用load，load调用getLocally（分布式场景下调用getFromPeer从
    其他节点获取），getLocally调用回调函数getter.Get获取数据源，并将源数据添加
    到缓存mainCache中（通过populateCache方法）
+
+1	                            是
+2	接收 key --> 检查是否被缓存 -----> 返回缓存值 ⑴
+3	                |  否                         是
+4	                |-----> 是否应当从远程节点获取 -----> 与远程节点交互 --> 返回缓存值 ⑵
+5	                            |  否
+6	                            |-----> 调用`回调函数`，获取值并添加到缓存 --> 返回缓存值 ⑶
 */
 
 func (g *Group) Get(key string) (ByteView, error) {
@@ -110,7 +122,7 @@ func (g *Group) Get(key string) (ByteView, error) {
 // 若是本机节点或失败，则回退到 getLocally()。
 func (g *Group) load(key string) (value ByteView, err error) {
 	// 每个key仅被获取一次
-	viewi, err := g.flight.Do(key, func() (interface{}, error) {
+	view, err := g.flight.Do(key, func() (interface{}, error) {
 		if g.server != nil {
 			if fetcher, ok := g.server.Pick(key); ok {
 				//fmt.Println(66666666666666)
@@ -126,7 +138,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 	})
 
 	if err == nil {
-		return viewi.(ByteView), nil
+		return view.(ByteView), nil
 	}
 	return ByteView{}, err
 }

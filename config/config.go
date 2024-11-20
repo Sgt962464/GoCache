@@ -3,15 +3,17 @@ package config
 import (
 	"github.com/spf13/viper"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"sync"
+	"time"
 
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 )
 
 var Conf *Config
 var DefaultEtcdConfig clientv3.Config //etcd客户端配置
+var once sync.Once
 
 type Config struct {
 	Mysql    *MySQL              `yaml:"mysql"`
@@ -65,11 +67,12 @@ func InitConfig() {
 
 }
 func InitClientV3Config() {
-	DefaultEtcdConfig = clientv3.Config{
-		Endpoints:   Conf.Etcd.Address,
-		DialTimeout: time.Second * 5, //超时时间为5s
-	}
-
+	once.Do(func() {
+		DefaultEtcdConfig = clientv3.Config{
+			Endpoints:   Conf.Etcd.Address,
+			DialTimeout: time.Second * 5, //超时时间为5s
+		}
+	})
 }
 
 // 从当前工作目录开始，逐级向上查找，直到找到go.mod

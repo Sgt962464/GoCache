@@ -41,7 +41,7 @@ Add 添加真实节点
   - 在hashMap中添加虚拟节点与真实节点的映射值
   - 环上的hash value排序
 */
-func (m *ConsistentHash) Add(keys []string) {
+func (m *ConsistentHash) AddTruthNode(keys []string) {
 	for _, key := range keys {
 		for i := 0; i < m.replicas; i++ {
 			hash := int(m.hash([]byte(strconv.Itoa(i) + key)))
@@ -59,7 +59,7 @@ Get 选择节点
   - 顺时针找到第一个匹配的虚拟节点下标idx，从m.virtualNodes中获取对应的hash value
   - 通过hashMap映射得到真实节点/‘
 */
-func (m *ConsistentHash) Get(key string) string {
+func (m *ConsistentHash) GetTruthNode(key string) string {
 	if len(m.virtualNodes) == 0 {
 		return ""
 	}
@@ -75,7 +75,7 @@ func (m *ConsistentHash) Get(key string) string {
 	return m.hashMap[m.virtualNodes[idx%len(m.virtualNodes)]]
 }
 
-func (m *ConsistentHash) Remove(key string) {
+func (m *ConsistentHash) RemovePeer(key string) {
 	// 将真实节点从 hash 环中删除
 	// logger.LogrusObj.Warn("peers:", v)
 	virtualHash := []int{}
