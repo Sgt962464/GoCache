@@ -1,8 +1,8 @@
 package service
 
 import (
-	"gocache/internal/service/policy"
-	"gocache/internal/service/policy/interfaces"
+	"gocache/internal/policy"
+	"gocache/internal/policy/interfaces"
 	"gocache/utils/logger"
 	"sync"
 )

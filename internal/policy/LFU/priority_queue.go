@@ -1,6 +1,6 @@
 package LFU
 
-import "gocache/internal/service/policy/interfaces"
+import "gocache/internal/policy/interfaces"
 
 type priorityqueue []*lfuEntry
 

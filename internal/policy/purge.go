@@ -1,10 +1,10 @@
 package policy
 
 import (
-	"gocache/internal/service/policy/FIFO"
-	"gocache/internal/service/policy/LFU"
-	"gocache/internal/service/policy/LRU"
-	"gocache/internal/service/policy/interfaces"
+	"gocache/internal/policy/FIFO"
+	"gocache/internal/policy/LFU"
+	"gocache/internal/policy/LRU"
+	"gocache/internal/policy/interfaces"
 	"strings"
 )
 

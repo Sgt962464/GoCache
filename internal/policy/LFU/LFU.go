@@ -2,7 +2,7 @@ package LFU
 
 import (
 	"container/heap"
-	"gocache/internal/service/policy/interfaces"
+	"gocache/internal/policy/interfaces"
 	"time"
 )
 

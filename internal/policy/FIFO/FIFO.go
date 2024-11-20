@@ -2,7 +2,7 @@ package FIFO
 
 import (
 	"container/list"
-	"gocache/internal/service/policy/interfaces"
+	"gocache/internal/policy/interfaces"
 	"time"
 )
 

@@ -6,7 +6,7 @@ import (
 	pb "gocache/api/groupcachepb"
 	"gocache/config"
 	"gocache/discovery"
-	"gocache/internal/pkg/student/dao"
+	"gocache/test/pkg/student/dao"
 	"gocache/utils/logger"
 	"math"
 	"math/rand"
@@ -38,7 +38,7 @@ func main() {
 	}
 
 	// 服务发现（直接根据服务名字获取与服务的虚拟端连接）
-	conn, err := discovery.Discovery(cli, config.Conf.Services["ggcache"].Name)
+	conn, err := discovery.Discovery(cli, config.Conf.Services["groupcache"].Name)
 	if err != nil {
 		panic(err)
 	}

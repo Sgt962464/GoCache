@@ -1,4 +1,4 @@
-package consistenthash
+package service
 
 import (
 	"gocache/utils/logger"

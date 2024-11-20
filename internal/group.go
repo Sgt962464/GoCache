@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	pb "gocache/api/studentpb"
-	dao2 "gocache/internal/pkg/student/dao"
+	dao2 "gocache/test/pkg/student/dao"
 	"gocache/utils/logger"
 	"gorm.io/gorm"
 	"math/rand"

@@ -3,7 +3,7 @@ package LRU
 import (
 	"fmt"
 	"gocache/config"
-	"gocache/internal/service/policy/interfaces"
+	"gocache/internal/policy/interfaces"
 	"reflect"
 	"testing"
 )

@@ -3,7 +3,7 @@ package LFU
 import (
 	"container/heap"
 	"fmt"
-	"gocache/internal/service/policy/interfaces"
+	"gocache/internal/policy/interfaces"
 	"testing"
 )
 

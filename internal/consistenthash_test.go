@@ -1,4 +1,4 @@
-package consistenthash
+package service
 
 import (
 	"gocache/config"
@@ -19,7 +19,7 @@ func TestConsistentHash(t *testing.T) {
 	// 6 16 26
 	// 4 14 24
 	// 2 12 22
-	ch.Add([]string{"2", "4"})
+	ch.AddTruthNode([]string{"2", "4"})
 	for _, virtualhash := range ch.virtualNodes {
 		logger.LogrusObj.Infof("虚拟节点 hash 值：%d, 对应的真实节点为：%s", virtualhash, ch.hashMap[virtualhash])
 	}
@@ -32,7 +32,7 @@ func TestConsistentHash(t *testing.T) {
 	// 因此 key1 应该打到节点 2 上，key2 应该打到节点 4 上
 	// 2322626082 2871910706 3693793700 4252452532
 	expectK1, expectK2 := "2", "4"
-	if ch.Get(key1) != expectK1 || ch.Get(key2) != expectK2 {
+	if ch.GetTruthNode(key1) != expectK1 || ch.GetTruthNode(key2) != expectK2 {
 		t.Fatal("GetTruthNode 错误")
 	}
 }

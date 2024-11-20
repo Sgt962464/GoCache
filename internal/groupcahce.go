@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"gocache/internal/service/singleflight"
 	"gocache/utils/logger"
 	"gorm.io/gorm"
 	"sync"
@@ -39,7 +38,7 @@ type Group struct {
 	mainCache *cache
 	retriever Retriever
 	server    Picker
-	flight    *singleflight.SingleFlight
+	flight    *SingleFlight
 }
 
 // RegisterServer 注册一个 server Picker  ,用以选择远程对等节点
@@ -63,7 +62,7 @@ func NewGroup(name string, strategy string, maxBytes int64, retriever Retriever)
 		name:      name,
 		mainCache: newCache(strategy, maxBytes),
 		retriever: retriever,
-		flight:    singleflight.NewSingleFlight(time.Second * 10),
+		flight:    NewSingleFlight(time.Second * 10),
 	}
 
 	mu.Lock()

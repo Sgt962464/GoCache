@@ -3,7 +3,7 @@ package dao
 import (
 	"context"
 	stuPb "gocache/api/studentpb"
-	"gocache/internal/pkg/student/model"
+	"gocache/test/pkg/student/model"
 	"gocache/utils/logger"
 	"gorm.io/gorm"
 )

@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	stuPb "gocache/api/studentpb"
-	"gocache/internal/pkg/student/dao"
-	"gocache/internal/pkg/student/encode"
+	"gocache/test/pkg/student/dao"
+	encode "gocache/test/pkg/student/encode"
 )
 
 type StudentSrv struct {
@@ -32,7 +32,6 @@ func (s *StudentSrv) StudentRegister(ctx context.Context, req *stuPb.StudentRequ
 	err = dao.NewStudentDao(ctx).CreateStudent(req)
 	if err != nil {
 		resp.Code = encode.ERROR
-		resp.Message = encode.GetMsg(int(resp.Code))
 		return
 	}
 	resp.Message = encode.GetMsg(int(resp.Code))

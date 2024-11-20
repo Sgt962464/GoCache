@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	stuPb "gocache/api/studentpb"
-	"gocache/internal/pkg/student/model"
+	"gocache/test/pkg/student/model"
 	"gocache/utils/logger"
 	"math/rand"
 	"os"
@@ -12,7 +12,6 @@ import (
 )
 
 func migration() {
-	fmt.Println("TEST")
 	if isHasTable("student") {
 		return
 	}
@@ -21,7 +20,6 @@ func migration() {
 		AutoMigrate(&model.Student{})
 
 	if err != nil {
-		logger.LogrusObj.Infoln("register table failed")
 		os.Exit(0)
 	}
 	InitilizeDB()

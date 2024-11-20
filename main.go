@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"gocache/config"
 	"gocache/discovery"
-	"gocache/internal/pkg/student/dao"
-	"gocache/internal/service"
+	grpcservice "gocache/internal"
+	"gocache/test/pkg/student/dao"
 	"gocache/utils/logger"
 )
 
@@ -20,11 +20,11 @@ func main() {
 	flag.Parse()
 
 	serviceAddr := fmt.Sprintf("localhost:%d", *port)
-	gm := service.NewGroupManager([]string{"scores", "website"}, serviceAddr)
+	gm := grpcservice.NewGroupManager([]string{"scores", "website"}, serviceAddr)
 
 	//通过通信来共享内存而不是通过共享内存来通信
 	updateChan := make(chan struct{})
-	svr, err := service.NewServer(updateChan, serviceAddr)
+	svr, err := grpcservice.NewServer(updateChan, serviceAddr)
 	if err != nil {
 		logger.LogrusObj.Errorf("acquire grpc server instance failed, %v", err)
 		//logger.LogrusObj

@@ -1,4 +1,4 @@
-package singleflight
+package service
 
 import "testing"
 

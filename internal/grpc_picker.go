@@ -5,7 +5,6 @@ import (
 	"fmt"
 	pb "gocache/api/groupcachepb"
 	"gocache/discovery"
-	"gocache/internal/service/consistenthash"
 	"gocache/utils/logger"
 	"gocache/utils/validate"
 	"google.golang.org/grpc"
@@ -39,7 +38,7 @@ type Server struct {
 	update     chan struct{}
 
 	mu       sync.Mutex
-	consHash *consistenthash.ConsistentHash
+	consHash *ConsistentHash
 	clients  map[string]*Client
 }
 
@@ -104,8 +103,8 @@ func (s *Server) SetPeers(peersAddr []string) {
 		peersAddr = []string{s.Addr}
 	}
 
-	s.consHash = consistenthash.NewConsistentHash(defaultReplicas, nil) //新的哈希环
-	s.consHash.AddTruthNode(peersAddr)                                  //添加对等节点（真实）
+	s.consHash = NewConsistentHash(defaultReplicas, nil) //新的哈希环
+	s.consHash.AddTruthNode(peersAddr)                   //添加对等节点（真实）
 
 	s.clients = make(map[string]*Client)
 
@@ -163,7 +162,7 @@ func (s *Server) reconstruct() {
 
 	s.mu.Lock()
 
-	s.consHash = consistenthash.NewConsistentHash(defaultReplicas, nil)
+	s.consHash = NewConsistentHash(defaultReplicas, nil)
 	s.consHash.AddTruthNode(serviceList)
 	s.clients = make(map[string]*Client)
 
