@@ -3,7 +3,7 @@ package LRU
 import (
 	"container/list"
 	"gocache/config"
-	"gocache/internal/service/policy/interfaces"
+	"gocache/internal/policy/interfaces"
 	"gocache/utils/logger"
 	"log"
 	"sync"
@@ -46,7 +46,7 @@ func NewLRUCache(maxBytes int64, onEvicted func(string, interfaces.Value)) *LRUC
 	log.Printf("set ttl is %d s", ttl)
 
 	go func() {
-		ticker := time.NewTicker(time.Minute * 1)
+		ticker := time.NewTicker(time.Minute * 2)
 		defer ticker.Stop()
 
 		for {
@@ -55,6 +55,7 @@ func NewLRUCache(maxBytes int64, onEvicted func(string, interfaces.Value)) *LRUC
 			logger.LogrusObj.Warnf("触发过期缓存，清理后台任务......")
 		}
 	}()
+
 	return lru
 }
 
@@ -133,22 +134,21 @@ func (c *LRUCache) Len() int {
 	return c.ll.Len()
 }
 
-// TODO
 func (c *LRUCache) CleanUp(ttl time.Duration) {
-	for ele := c.ll.Front(); ele != nil; ele = ele.Next() {
-		c.mu.Lock()
-		if ele.Value == nil {
-			c.mu.Unlock()
-			return
-		}
-		if ele.Value.(*interfaces.Entry).Expired(ttl) {
-			kv := c.ll.Remove(ele).(*interfaces.Entry)
-			delete(c.cache, kv.Key)
-			c.usedBytes -= c.usedLen(kv)
-			if c.OnEvicted != nil {
-				c.OnEvicted(kv.Key, kv.Value)
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for e := c.ll.Back(); e != nil; {
+		next := e.Prev()
+		if entry, ok := e.Value.(*interfaces.Entry); ok && entry != nil {
+			if entry.Expired(ttl) {
+				c.ll.Remove(e)
+				delete(c.cache, entry.Key)
+				c.usedBytes -= c.usedLen(entry)
+				if c.OnEvicted != nil {
+					c.OnEvicted(entry.Key, entry.Value)
+				}
 			}
 		}
+		e = next
 	}
-	c.mu.Unlock()
 }
