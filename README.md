@@ -147,7 +147,7 @@
 
 2. mysql 服务（"127.0.0.1:3306"）
 
-3. goreman (etcd 集群) `internal/middleware/etcd/cluster` 中有使用说明
+3. goreman (etcd 集群) `etcd/use.md` 中有使用说明
 
     - 本项目默认依赖了 etcd 集群，需要先关闭本地的 etcd 服务，然后使用 goreman 同时启动三个 etcd 服务进行统一管理
     - 如果不想依赖 etcd 集群，那么在 config/config.yml 中将 22379 和 32379 删除然后启动本地 etcd 服务即可
@@ -166,7 +166,6 @@
 ## 系统运行
 
 ### 预热阶段
-https://github.com/1055373165/ggcache/assets/33158355/3215adb2-6615-481f-861d-6c1369179d7c
 
 1. 使用 goreman 启动 etcd 集群（3 个 etcd 节点），实现高可用的、强一致性的外部存储中心
 
@@ -178,7 +177,6 @@ https://github.com/1055373165/ggcache/assets/33158355/3215adb2-6615-481f-861d-6c
 
 ### 工作阶段
 
-https://github.com/1055373165/ggcache/assets/33158355/7b95a2c2-98a5-40bd-8467-b19c55a3292e
 
 1. 某些节点的缓存预热完毕后，可以直接从缓存中返回结果，因此处理速度肉眼可见的变快了
 
@@ -191,7 +189,6 @@ https://github.com/1055373165/ggcache/assets/33158355/7b95a2c2-98a5-40bd-8467-b1
 
 ### 动态节点管理
 
-https://github.com/1055373165/ggcache/assets/33158355/1c771e10-c11c-493f-8488-a1cfa7e45f1e
 
 动态获取速度可自定义配置，因为一般情况下网络拓扑相对比较稳定，没有必要后台启动一个长轮询任务一直监听不太可能发生的事件，这对于系统性能是一种浪费。
 
@@ -208,9 +205,9 @@ https://github.com/1055373165/ggcache/assets/33158355/1c771e10-c11c-493f-8488-a1
 
 3. 负载均衡策略优化 ✅
 
-- 添加 `arc`算法 todo
+    - 添加 `arc`算法 todo
 
-- `LRU2` 算法升级（高低水位） todo
+    - `LRU2` 算法升级（高低水位） todo
 
 4. 增加请求限流（令牌桶算法） todo
 
@@ -228,7 +225,7 @@ https://github.com/1055373165/ggcache/assets/33158355/1c771e10-c11c-493f-8488-a1
 4. [ `gRPC` 官方文档](https://grpc.io/docs/languages/go/quickstart/)
 5. [`protobuf` 官方文档](https://protobuf.dev/programming-guides/proto3/)
 6. [`protobuf` 编码原理](https://www.notion.so/blockchainsee/Protocol-Buffer-04cba19af055479299507f04d0a24862)
-7. [`protobuf` 个人学习笔记](https://www.notion.so/blockchainsee/protoscope-fbfe36c2eef64bfcb630be4f0bd673f5)
+7. [`protobuf` 笔记](https://www.notion.so/blockchainsee/protoscope-fbfe36c2eef64bfcb630be4f0bd673f5)
 8. [etcd 官方文档](https://etcd.io/docs/v3.5/)
 9. [ `etcd` 集群搭建](https://github.com/mattn/goreman)
 10. [shell 脚本](https://www.shellscript.sh/)
