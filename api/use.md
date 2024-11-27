@@ -1,6 +1,35 @@
-1. 编写xxx.prote文件
-    1. 定义 Request 和 Response message 作为 rpc 从请求和响应的结构体
-    2. 定义 GroupCache 服务，Get 方法，以请求结构体作为参数，以响应结构体作为返回值
-2. 运行```  protoc --go_out=../groupcachepb --go_opt=paths=source_relative --go-grpc_out=../groupcachepb --go_opt=paths=source_relative groupcache.proto```
-    1. --go_out 指定 xxx.pb.go 的输出路径，--go-grpc_out 指定了 xxx_grpc.pb.go 的输出路径
-3. 实现RPC client和serve
+## 0. environment install
+
+- go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+- go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+## 1. preparing proto files
+
+- Define Request and Response message as structures for rpc requests and responses
+- Define the ggcache service and rpc method, taking the request structure as a parameter and the response structure as the return value
+
+## 2. generate stub and skeleton code
+
+Generate the specified xxx.pb.go and xxx _ grpc.pb.go files using the protoc tool.(in api direcotory)
+
+- Create the groupcachepb and studentpb directories firstly,then execute them in the api directory
+
+```
+protoc --go_out=ggcachepb --go_opt=paths=source_relative \
+--go-grpc_out=ggcachepb --go-grpc_opt=paths=source_relative \
+ggcache.proto
+
+protoc --go_out=studentpb --go_opt=paths=source_relative \
+--go-grpc_out=studentpb --go-grpc_opt=paths=source_relative \
+student.proto
+```
+
+其中
+
+--go_out 指定 ggcache.pb.go 的输出路径
+
+--go-grpc_out 指定了 ggcache_grpc.pb.go 的输出路径
+
+## 3. implement RPC client and serve
+
+- client.go
+- server.go

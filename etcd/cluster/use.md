@@ -8,6 +8,10 @@
 
 > go install github.com/mattn/goreman@latest
 
+在启动集群之前，先将本地的 etcd 服务停掉（防止占用 2379 端口）.windows可使用如下命令
+
+>taskkill /f /t /im "2379"
+
 使用 etcd 的 Procfile 启动一个集群。
 
 >goreman -f Procfile start
@@ -20,7 +24,7 @@
 
 使用etcdctl与正在运行的集群交互：
 
-打印成员列表：
+打印成员列表(节选部分)：
 
 > etcdctl --write-out=table --endpoints=localhost:2379 member list
 

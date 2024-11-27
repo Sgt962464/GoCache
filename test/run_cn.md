@@ -1,12 +1,16 @@
-# 测试介绍
+# 项目介绍
 
-- 已经实现全自动节点管理，拥有节点动态增删和一致性视图重构能力，无需先往 etcd 中导入实例地址
+已经实现全自动节点管理，拥有节点动态增删和一致性视图重构能力，无需先往 etcd 中导入实例地址
 
-## test
+## 测试
 
-前置：一定要先运行 etcd 集群，在 internal/middleware/cluster 有详细介绍（先将本地的 2379 etcd 服务停掉）
+前置
 
-### grpc test
+1. 运行 etcd 集群，参考 etcd/cluster/use.md；
+2. 初始化测试需要使用的 student 服务的数据库，参考 test/sql/create_sql.md
+3. groupcache 服务和 student 服务通过 grpc 进行进程间通信，参考 api/use.md
+
+### 服务启动
 
 - 在三个 terminal 下分别运行
   - go run main.go -port 9999
@@ -23,8 +27,8 @@
 - 增加了重试机制（在服务器崩溃恢复后可以立即获取响应）
 - 将 "record not found" 视作正常结果而不是错误
 
-运行：go run /test/grpc/grpc_client.go 进行测试，也可以在完成了上述操作后执行 ./test3.sh 进行测试
+### 测试 grpc 通信
 
-### http
-- http_test1.sh: 有限个查询用例，之所以请求 http://localhost:9999 是因为 api server 运行在 ":9999"，然后对请求进行分发（一致性哈希算法实现的负载均衡）；
-- http_test2.sh: 无限迭代查询，http server 是通过 api server 实现的代理请求转发。
+1. 可以直接在项目根目录运行 `go run test/client/grpc_client.go` 进行测试
+2. 或者直接进入 test/client 目录下，运行 `./client.sh` 进行测试
+
